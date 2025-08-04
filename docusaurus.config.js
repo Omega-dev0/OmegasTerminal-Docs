@@ -12,13 +12,13 @@ import { themes as prismThemes } from 'prism-react-renderer';
 const config = {
   title: "Omega's Terminal",
   tagline: 'A modern and modular terminal for clanning',
-  favicon: 'img/log.png',
+  favicon: 'img/logo.png',
 
   // Future flags, see https://docusaurus.io/docs/api/docusaurus-config#future
   future: {
     v4: true, // Improve compatibility with the upcoming Docusaurus v4
   },
-
+  plugins: [require.resolve('docusaurus-lunr-search')],
   // Set the production url of your site here
   url: 'https://terminal-docs.omegadev.xyz',
   // Set the /<baseUrl>/ pathname under which your site is served
@@ -60,7 +60,6 @@ const config = {
     /** @type {import('@docusaurus/preset-classic').ThemeConfig} */
     ({
       // Replace with your project's social card
-      favicon: 'img/logo.ico',
       image: 'img/logo.png',
       navbar: {
         title: "Omega's Terminal",
@@ -95,7 +94,7 @@ const config = {
             items: [
               {
                 label: 'Tutorial',
-                to: '/docs/intro',
+                to: '/docs/Guides/Basic/Setup',
               },
             ],
           },
