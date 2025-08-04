@@ -1,0 +1,324 @@
+---
+title: Khol's setup
+sidebar_position: 5
+---
+
+import Tabs from '@theme/Tabs';
+import TabItem from '@theme/TabItem';
+
+:::note[About this guide]
+**Time to complete**: 3min <br />
+**Difficulty**: <span style={{color: '#f4e380ff'}}>**Medium**</span> <br />
+:::
+
+# Setting up Khol's admin
+
+Here's a guide on how to install and properly configure khol's admin for your game and unlock the full potential of the terminal.
+
+
+## Insert the model
+Get the model from the [official website](https://kohl.gg/) and put it in **ServerScriptService**.
+
+## Basic configuration
+
+Open the Settings file under Config > Settings and replace it with this config:
+<details>
+<summary>Configuration</summary>
+```lua
+--[[ DEFAULT ROLES
+┏━━━━━━━━━┳━━━━━━━━━━━━━━┳━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓
+┃ RANK    ┃ ROLE         ┃ DETAILS                                                                                                ┃
+┣━━━━━━━━━╋━━━━━━━━━━━━━━╋━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┫
+┃ inf     ┃ creator      ┃ Can do everything, automatically given to the creator of the group/game.                               ┃
+┃ 4       ┃ superadmin   ┃ Can permanently role users, change settings, shutdown servers, give badges, and use commands globally. ┃
+┃ 3       ┃ admin        ┃ Can permanently ban users and give roles per server.                                                   ┃
+┃ 2       ┃ mod          ┃ Can kick and server ban with other potentially abusive commands.                                       ┃
+┃ 1       ┃ vip          ┃ Can only use commands on themselves, limited to non-abusive cosmetic commands.                         ┃
+┃ 0       ┃ everyone     ┃ The default role, limited to basic features.                                                           ┃
+┗━━━━━━━━━┻━━━━━━━━━━━━━━┻━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
+--]]
+
+return {
+
+	-- ⛔ BAN DATABASE
+	-- Format: ["UserId"] = {Username, Reason, Duration, BannedByUserId}
+	-- Duration: -1 = permanent, 0 = server ban, >0 = temp ban (UTC timestamp)
+	bans = {
+	},
+
+	-- 👤 USER ROLES - Assign roles by UserId or Username
+	userRoles = {
+		vip = {},
+		mod = {},
+		admin = {},
+		superadmin = {},
+		creator = {},
+	},
+
+	-- 📦 ASSET ROLES
+	assetRoles = {
+		-- [assetId] = { "vip", "mod" },
+	},
+
+	-- 💵 GAMEPASS ROLES
+	gamepassRoles = {
+		-- [gamepassId] = { "vip", "mod" },
+	},
+
+	-- 💳 SUBSCRIPTION ROLES
+	subscriptionRoles = {
+		-- [subscriptionId] = { "vip", "mod" },
+	},
+
+	-- 🏢 GROUP ROLES
+	groupRoles = {
+		-- [groupId] = {
+		-- 	{ rank = 200, roles = { "vip", "admin" }, exactRank = false },
+		-- },
+	},
+
+	-- 👥 FRIEND ROLES
+	friendRoles = {
+		-- "vip",
+	},
+
+	-- 👑 FREE ADMIN ROLES - ⚠️ Affects all players
+	freeAdmin = {
+		-- "vip",
+		-- "mod",
+		-- "admin",
+	},
+
+	announcements = {
+		-- {
+		-- 	From = "_K", -- userId or "_K"
+		-- 	Duration = 30, -- seconds, 0 = no auto-hide
+		-- 	Text = "Hi!",
+		-- },
+	},
+
+	notifications = {
+		-- {
+		-- 	From = "_K", -- userId or "_K"
+		-- 	Duration = 30, -- seconds, 0 = no auto-hide
+		-- 	Text = "Hi!",
+		-- },
+	},
+
+	-- 🔧 SYSTEM SETTINGS
+	prefix = { ";", ":" }, -- Command trigger characters
+	splitKey = "%s", --       Command/argument separator
+
+	commandBarRank = 0, --       Minimum rank for Command Bar (false = disable)
+	dashboardRank = 0, --        Minimum rank for Dashboard (false = disable)
+	dashboardButtonRank = false, --  Minimum rank for Dashboard button (false = disable)
+	joinNotificationRank = false, -- Minimum rank for join notifications (false = disable)
+
+	welcomeBadgeId = 0, -- Badge for new players (0 = none)
+
+	addToCharts = false, -- Add this game to the Kohl's Admin Charts  (⚠️ Requires "Allow HTTP Requests" in File > Game Settings > Security)  https://roblox.com/games/17873329124/Kohls-Admin-Charts
+	vip = false, --         Enable VIP features                       (⚠️ Required if addToCharts is true)
+
+	chatCommands = true, --            Enable commands via chat
+	commandRequests = false, --         Request commands on same/higher rank
+	onlyShowUsableCommands = false, -- Show only purchasable/usable commands
+	getKohlsAdminPopup = false, --      Show the Get Kohl's Admin popup
+	wrongPrefixWarning = true, --      Warn on incorrect prefix
+	saveLogs = true, --                Save/sync logs across servers
+
+	theme = "Default", --               Initial theme (customize in Config.Themes)
+	changeThemeAuthority = "Client", -- "Client", "Server", or "Studio"
+
+	commands = { -- Configure command access per role
+		everyone = {
+			help = true,
+			shutdown = false,
+		},
+		vip = {},
+		mod = {},
+		admin = {},
+		superadmin = {},
+		creator = {},
+	},
+
+	-- 🎭 ROLE CONFIGURATION
+	roles = {
+		{ -- Default Role
+			_key = "everyone", -- ⚠️ DO NOT CHANGE
+
+			name = "Player",
+			color = "#aaa", -- Hex color only
+
+			groups = {
+				-- "creator", --        clearlogs, hidelogs, script, localscript, etc.
+				-- "superadmin", --     badge, clearterrain, reserve, shutdown, global, etc.
+				-- "administration", -- announce, role, btools, gear, insert, place, serverlock, etc.
+				-- "moderation", --     ban, kick, jail, teleport, mute, warnings, etc.
+				-- "environment", --    fix, lighting, gravity, wind, water, atmosphere, etc.
+				-- "general", --        respawn, refresh, spectate, view, vote, xray, etc.
+				-- "fun", --            disco, explode, clone, punish, zombie, etc. (abusive)
+				-- "vip", --            appearance, accessories, animations, particles, etc.
+				"utility", --           help, version, info, logs, etc. (safe basics)
+			},
+
+			limits = {
+				cooldown = 4, -- Cooldown period in seconds
+				commands = 4, -- Max commands per cooldown
+				targets = 1, --  Max targets per command
+			},
+
+			permissions = {
+				admin = false, --   ⚠️ Bypasses all permissions
+				banasync = false, --   Saved bans
+				saveRoles = false, --  Saved roles
+				settings = false, --   Saved settings
+				serverlogs = false, -- Server logs
+			},
+
+			onlyTargetSelf = true, -- Can only use commands on self
+		},
+
+		{ -- VIP Role
+			_key = "vip", -- ⚠️ DO NOT CHANGE
+			name = "VIP",
+			color = "#0ff",
+			groups = { "vip" },
+			limits = { cooldown = 4, commands = 16, targets = 1 },
+			permissions = {},
+			onlyTargetSelf = true,
+		},
+
+		-- 🎭 Create as many roles as you want!
+		-- Use the _key in other settings like friendRoles to auto give the role
+		-- Helper would be higher rank than VIP, and lower than moderator
+
+		-- {
+		-- 	_key = "helper",
+		-- 	name = "Helper",
+		-- 	color = "#080",
+		-- 	groups = { "general" },
+		-- 	limits = { cooldown = 4, commands = 32, targets = math.huge },
+		-- 	permissions = { serverlogs = true },
+		-- },
+
+		{ -- Moderator Role
+			_key = "mod", -- ⚠️ DO NOT CHANGE
+			name = "Moderator",
+			color = "#0f0",
+			groups = { "moderation", "general", "environment", "fun", "vip" },
+			limits = { cooldown = 4, commands = 32, targets = math.huge },
+			permissions = { serverlogs = true },
+		},
+
+		{ -- Administrator Role
+			_key = "admin", -- ⚠️ DO NOT CHANGE
+			name = "Administrator",
+			color = "#fc0",
+			groups = { "administration", "moderation", "general", "environment", "fun", "vip" },
+			limits = { cooldown = 4, commands = 64, targets = math.huge },
+			permissions = { banasync = true, serverlogs = true },
+		},
+
+		{ -- SuperAdmin Role
+			_key = "superadmin", -- ⚠️ DO NOT CHANGE
+			name = "SuperAdmin",
+			color = "#f80",
+			groups = { "superadmin", "administration", "moderation", "general", "environment", "fun", "vip" },
+			permissions = { banasync = true, saveRoles = true, settings = true, serverlogs = true },
+		},
+
+		[math.huge] = { -- Creator Role (Highest Authority)
+			_key = "creator", -- ⚠️ DO NOT CHANGE
+			name = "Game Creator",
+			color = "#f00",
+			permissions = { admin = true },
+		},
+	},
+}
+```
+</details>
+
+## Configure group permissions
+
+In your settings file, locate the group roles table and edit it according to the example:
+```lua
+-- 🏢 GROUP ROLES
+	groupRoles = {
+		-- [groupId] = {
+		-- 	{ rank = 200, roles = { "vip", "admin" }, exactRank = false },
+		-- },
+	},
+```
+
+## Add custom commands
+
+You can add custom commands by creating a module script in the `Config > Addons` folder.
+
+### Examples
+
+<details>
+<summary>Team chat toggle command</summary>
+
+```lua
+return function(_K)
+	local TextChatService = game:GetService("TextChatService")
+	local isTeamChatEnabled = false
+	
+	local function setupServer()
+		local general = TextChatService:WaitForChild("TextChannels"):WaitForChild("RBXGeneral") :: TextChannel
+		general.ShouldDeliverCallback = function(message:TextChatMessage, source:TextSource)
+			if(isTeamChatEnabled)then
+				local player = game:GetService("Players"):GetPlayerByUserId(message.TextSource.UserId)
+				if(message.TextSource.UserId == source.UserId)then
+					_K.Remote.Notify:FireClient(player,{
+						From = "_K",
+						Text = `<font color="rgb(255,125,0)">Your message was not sent because teamchat only mode is enabled !</font>`,
+					})
+				end
+				
+				
+				return "BLOCKED"
+			else
+				return true
+			end
+		end
+	end
+	
+	local function runServer(context, enable)
+		if(enable ~= nil)then
+			isTeamChatEnabled = enable
+		else
+			isTeamChatEnabled = not isTeamChatEnabled
+		end
+		context._K.Remote.Notify:FireAllClients({
+			From = "_K",
+			Text = `<b>Team chat {isTeamChatEnabled and "enabled" or "disabled"}</b>`,
+		})
+	end
+	
+	local arg = {
+		type = "boolean",
+		name= "enable",
+		description= "Wether to enable or disable the team chat only mode",
+		optional= true,
+	}
+	local command = {
+		name = "Teamchat",
+		aliases= { "tc" },               -- Table of aliases.
+		description= "Toggle team chat only mode",                -- Description of what the command does.
+		group= "administration",                      -- What group the command belongs to.
+		noLog= false,                    -- If the command should be hidden from logs.
+		args= { arg },      -- A table of argument definitions.
+		permissions= { }, -- A table of role permissions required to run the command.
+		envClient=nil,          -- Sets up an environment for the command.
+		env=setupServer,                -- Sets up an environment for the command.
+		runClient=nil,         -- What runs on the client of the player that ran the command.
+		run=runServer               -- What the command runs on the server.
+	}
+	
+	
+	
+	_K.Registry.registerCommand(_K, command)
+end
+```
+</details>

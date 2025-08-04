@@ -60,6 +60,7 @@ const config = {
     /** @type {import('@docusaurus/preset-classic').ThemeConfig} */
     ({
       // Replace with your project's social card
+      favicon: 'img/logo.ico',
       image: 'img/logo.png',
       navbar: {
         title: "Omega's Terminal",
@@ -75,12 +76,16 @@ const config = {
             label: 'Guides',
           },
           {
-            type: 'docSidebar',
-            sidebarId: 'addonsSidebar',
             position: 'left',
             label: 'Addons',
+            to: '/docs/Addons',
           },
         ],
+      },
+      colorMode: {
+        defaultMode: 'dark',
+        disableSwitch: false,
+        respectPrefersColorScheme: false,
       },
       footer: {
         style: 'dark',

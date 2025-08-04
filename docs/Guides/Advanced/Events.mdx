@@ -1,0 +1,36 @@
+---
+title: Events
+sidebar_position: 3
+---
+
+import Tabs from '@theme/Tabs';
+import TabItem from '@theme/TabItem';
+
+
+:::note[About this guide]
+**Difficulty**: <span style={{color: '#f49280ff'}}>**Medium**</span> <br />
+:::
+
+# Events
+
+The terminal exposes a few events you can use in addons
+
+---
+
+## Available events
+
+- `stateChanged`: (newState: "locked" | "attackers" | "defenders" | "neutral") - Fired when the terminal's state changes.
+- `pointsChanged`: (newAttackerPoints: number, newDefenderPoints: number) - Fired when the terminal's points change.
+- `playerCountChanged`: (newAttackersCount: number, newDefendersCount: number) - Fired when the number of players on the terminal changes.
+- `captureProgressChanged`: (newCaptureProgress: number) - Fired when the terminal's capture progress changes.
+- `endEvent`: (winner: "attackers" | "defenders" | "draw") - Fired when the terminal's ends.
+- `startEvent`: () - Fired at the start of the round.
+
+## Connecting to events
+
+Events are `BindableEvents` and can be connected to using the `:Connect()` method.
+```lua
+wrapper.terminal.events.startEvent.Event:Connect(function()
+	print("The terminal has started!")
+end)
+```

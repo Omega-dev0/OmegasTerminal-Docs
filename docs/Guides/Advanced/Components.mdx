@@ -1,0 +1,173 @@
+---
+title: Components
+sidebar_position: 2
+---
+
+import Tabs from '@theme/Tabs';
+import TabItem from '@theme/TabItem';
+
+
+:::note[About this guide]
+**Difficulty**: <span style={{color: '#f49280ff'}}>**Hard**</span> <br />
+:::
+
+# Components
+
+Components are at the core of the terminal, they are responsible for handling the logic and can be swapped out to change the terminal's behavior.
+
+---
+
+## Creating a component
+
+Components are functions that receive specific parameters and return an expected value.
+
+<details>
+<summary>Components parameters and return values</summary>
+```lua
+--- Updates the attacker and defender points for a terminal based on its current state and configuration.
+-- @param terminal table: The terminal object.
+-- @param tickRate number: The rate at which points are updated (ticks per second).
+-- @return table: A table containing the updated AttackerPoints and DefenderPoints.
+function components.updatePoints(terminal: terminal, tickRate: number): { AttackerPoints: number, DefenderPoints: number }
+    -- logic here
+	return {
+        AttackerPoints = newAttackerPoints,
+		DefenderPoints = newDefenderPoints,
+	}
+end
+
+--- Calculates the number of attackers and defenders currently present in the terminal's zone.
+-- @param terminal The terminal object.
+-- @return A table containing:
+--   - AttackersCount (number): The count of players on the attacker team.
+--   - DefendersCount (number): The count of players on the defender team.
+function components.getPlayerCount(terminal: terminal, tickRate: number): { AttackersCount: number, DefendersCount: number }
+	-- logic here
+	return {
+		AttackersCount = attackersCount,
+		DefendersCount = defendersCount,
+	}
+end
+
+--- Computes and returns the current state of the terminal based on its properties.
+-- @param terminal The terminal object.
+-- @return terminalState The computed state of the terminal ("locked", "attackers", "defenders", or "neutral").
+function components.computeState(terminal: terminal): "locked" | "attackers" | "defenders" | "neutral"
+	-- logic here
+    return terminalState
+end
+
+--- Updates the capture progress of a terminal.
+-- @param terminal table Terminal object.
+-- @param tickRate number The rate at which progress is updated per tick.
+-- @return number The updated capture progress.
+function components.updateCaptureProgress(terminal: terminal, tickRate: number): number
+	--logic here
+	return newCaptureProgress
+end
+
+--- Determines the winner.
+-- @param terminal object.
+-- @return "attackers" if attackers have won,
+--         "defenders" if defenders have won,
+--         "draw" if it's a draw,
+--         nil if no side has won yet.
+function components.getWinner(terminal): "attackers" | "defenders" | "draw" | nil
+	--logic here
+	return nil
+end
+
+```
+</details>
+
+## Installing terminal components
+
+In the server file:
+```lua
+wrapper:SwitchTerminalComponent("updatePoints",myNewUpdatePointsFunction)
+```
+
+## Examples
+
+<details>
+<summary>Lock the capture state only if there are the same amount of players of both teams on the terminal</summary>
+```lua
+function updateCaptureProgress(terminal: terminal, tickRate: number) : number
+    local newCaptureProgress = terminal.CaptureProgress
+    local attackersCount, defendersCount = terminal.attackersCount, terminal.defendersCount
+
+    if attackersCount > defendersCount then
+        newCaptureProgress += 1 / tickRate
+    elseif defendersCount > attackersCount then
+        newCaptureProgress -= 1 / tickRate
+    elseif attackersCount == 0 and defendersCount == 0 then
+        if(terminal.Config.resetIfTermIsEmpty == true) then
+            if(math.abs(newCaptureProgress) < 0.1)then
+                newCaptureProgress = 0
+            end
+
+            if(newCaptureProgress > 0) then
+                newCaptureProgress -= (1/tickRate)
+            elseif(newCaptureProgress < 0) then
+                newCaptureProgress += (1/tickRate)
+            end
+        end
+    end
+
+    if newCaptureProgress > terminal.Config.captureTime then
+        newCaptureProgress = terminal.Config.captureTime
+    elseif newCaptureProgress < -terminal.Config.captureTime then
+        newCaptureProgress = -terminal.Config.captureTime
+    end
+
+    return newCaptureProgress
+end
+
+wrapper:SwitchTerminalComponent("updateCaptureProgress",updateCaptureProgress)
+```
+</details>
+<details>
+<summary>Instantly capture the point from neutral</summary>
+```lua
+function updateCaptureProgress(terminal: terminal, tickRate: number) : number
+	local newCaptureProgress = terminal.CaptureProgress
+	local attackersCount, defendersCount = terminal.attackersCount, terminal.defendersCount
+
+	if attackersCount > 0 and defendersCount == 0 then
+		if(newCaptureProgress + (1 / tickRate) > 0)then
+			newCaptureProgress = terminal.Config.captureTime
+		else
+			newCaptureProgress += 1 / tickRate
+		end
+	elseif defendersCount > 0 and attackersCount == 0 then
+		if(newCaptureProgress - (1 / tickRate) < 0)then
+			newCaptureProgress = -terminal.Config.captureTime
+		else
+			newCaptureProgress -= 1 / tickRate
+		end
+	elseif attackersCount == 0 and defendersCount == 0 then
+		if(terminal.Config.resetIfTermIsEmpty == true) then
+			if(math.abs(newCaptureProgress) < 0.1)then
+				newCaptureProgress = 0
+			end
+
+			if(newCaptureProgress > 0) then
+				newCaptureProgress -= (1/tickRate)
+			elseif(newCaptureProgress < 0) then
+				newCaptureProgress += (1/tickRate)
+			end
+		end
+	end
+
+	if newCaptureProgress > terminal.Config.captureTime then
+		newCaptureProgress = terminal.Config.captureTime
+	elseif newCaptureProgress < -terminal.Config.captureTime then
+		newCaptureProgress = -terminal.Config.captureTime
+	end
+
+	return newCaptureProgress
+end
+
+wrapper:SwitchTerminalComponent("updateCaptureProgress",updateCaptureProgress)
+```
+</details>
