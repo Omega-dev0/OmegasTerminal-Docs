@@ -74,7 +74,6 @@ const config = {
         { name: "twitter:image", content: "https://terminal-docs.omegadev.xyz/img/meta.png" }
       ],
       // Replace with your project's social card
-      image: 'img/logo.png',
       navbar: {
         title: "Omega's Terminal",
         logo: {
