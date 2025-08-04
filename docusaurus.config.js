@@ -59,6 +59,20 @@ const config = {
   themeConfig:
     /** @type {import('@docusaurus/preset-classic').ThemeConfig} */
     ({
+      metadata: [
+        { name: "title", content: "Omega's Terminal documentation" },
+        { name: "description", content: "Guides and addons list for omega's clanning terminal" },
+        { name: "og:type", content: "website" },
+        { name: "og:url", content: "https://terminal-doc.omegadev.xyz/" },
+        { name: "og:title", content: "Omega's Terminal documentation" },
+        { name: "og:description", content: "Guides and addons list for omega's clanning terminal" },
+        { name: "og:image", content: "https://terminal-docs.omegadev.xyz/img/meta.png" },
+        { name: "twitter:card", content: "summary_large_image" },
+        { name: "twitter:url", content: "https://terminal-doc.omegadev.xyz/" },
+        { name: "twitter:title", content: "Omega's Terminal documentation" },
+        { name: "twitter:description", content: "Guides and addons list for omega's clanning terminal" },
+        { name: "twitter:image", content: "https://terminal-docs.omegadev.xyz/img/meta.png" }
+      ],
       // Replace with your project's social card
       image: 'img/logo.png',
       navbar: {
