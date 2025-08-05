@@ -125,6 +125,24 @@
               "icon": "lucide-list",
               "title": "Outline"
             }
+          },
+          {
+            "id": "489d16fc96a43652",
+            "type": "leaf",
+            "state": {
+              "type": "backlink",
+              "state": {
+                "collapseAll": false,
+                "extraContext": false,
+                "sortOrder": "alphabetical",
+                "showSearch": false,
+                "searchQuery": "",
+                "backlinkCollapsed": false,
+                "unlinkedCollapsed": true
+              },
+              "icon": "links-coming-in",
+              "title": "Backlinks"
+            }
           }
         ]
       }
