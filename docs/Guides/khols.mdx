@@ -323,7 +323,7 @@ end
 ```
 </details>
 <details>
-<summary>Group lock toggle command</summary>
+<summary>Server lock toggle command</summary>
 
 ```lua
 local GROUP_ID = 10055198
@@ -392,6 +392,221 @@ return function(_K)
 
 
 
+	_K.Registry.registerCommand(_K, command)
+end
+```
+</details>
+<details>
+<summary>Group lock command</summary>
+
+```lua
+
+
+local BYPASS_GROUPS = {} -- Default list of allowed groups IDs, cannot be modified in-game
+
+
+
+
+
+
+
+
+
+local allowedGroups = {}
+
+
+local groupLockAllowed
+local httpService = game:GetService("HttpService")
+local groupService = game:GetService("GroupService")
+return function(_K)
+	local isGroupLockEnabled = false
+	
+	local groupIdType = {
+		filterLog = true,
+		transform = function(v)
+			return if v == "" then 0 else tonumber(v)
+		end,
+		validate = function(v)
+			return v ~= nil and v == math.floor(v), "Only whole numbers are valid"
+		end,
+		parse = function(v, self)
+			local s,r = pcall(groupService.GetGroupInfoAsync, groupService, v)
+			if(s)then
+				return r
+			end
+			if self.definition.optional and self.rawArg == "" then
+				return ""
+			end
+			return nil, "Invalid group"
+		end,
+		suggestions = function(text)
+			return { if tonumber(text) then text else nil }
+		end,
+	}
+	local function setupServer()
+		
+		groupLockAllowed = Instance.new("StringValue")
+		groupLockAllowed.Name = "GroupLockAllowed"
+		groupLockAllowed.Parent = game.ReplicatedStorage
+		groupLockAllowed.Value = httpService:JSONEncode(allowedGroups)
+		
+		game.Players.PlayerAdded:Connect(function(player:Player)
+			if(isGroupLockEnabled == true)then
+				for _,allowedGroupId in pairs(BYPASS_GROUPS)do
+					if(player:GetRankInGroup(allowedGroupId) > 0)then
+						return
+					end
+				end
+				
+				for _,allowedGroup in pairs(allowedGroups)do
+					if(player:GetRankInGroup(allowedGroup.id) > 0)then
+						return
+					end
+				end
+				
+				player:Kick(`Grouplocked server ! You cannot join unless you are in one of the whitelisted groups.`)
+			end
+		end)
+	end
+
+	local function runServer(context, enable)
+		if(enable ~= nil)then
+			isGroupLockEnabled = enable
+		else
+			isGroupLockEnabled = not isGroupLockEnabled
+		end
+		context._K.Remote.Notify:FireAllClients({
+			From = "_K",
+			Text = `<b>Group lock {isGroupLockEnabled and "enabled" or "disabled"} !</b>`,
+		})
+	end
+	
+
+	local arg = {
+		type = "boolean",
+		name= "enable",
+		description= "Wether to enable or disable the group lock",
+		optional= true,
+	}
+	local command = {
+		name = "grouplock",
+		aliases= { "gc" },
+		description= "Toggle server group lock",
+		group= "moderation",   
+		noLog= false,
+		args= { arg },
+		permissions= { },
+		
+		envClient=function() print("Grouplock command made by Omega77073") end, 
+		env=setupServer,  
+		runClient=nil,
+		run=runServer
+	}
+	
+	
+	local arg2 = {
+		type = "groupId",
+		name= "groupId",
+		description= "The id of the whithelisted group",
+		optional= false,
+	}
+	local command2 = {
+		name = "grouplock-add",
+		aliases= { "gcadd","gc+" },
+		description= "Add a group to the group lock whitelist",
+		group= "moderation",   
+		noLog= false,
+		args= { arg2 },
+		permissions= { },
+		envClient=nil, 
+		env=nil,  
+		runClient=nil,
+		run=function(context, groupData)
+			table.insert(allowedGroups, {
+				id = groupData.Id,
+				Name = groupData.Name
+			})
+			groupLockAllowed.Value = httpService:JSONEncode(allowedGroups)
+			context._K.Remote.Notify:FireClient(context.fromPlayer,{
+				From = "_K",
+				Text = `<b>Added <font color="rgb(18,221,201)">{groupData.Name}</font> to the group lock whitelist</b>`,
+			})
+		end,
+	}
+	
+	local arg3 = {
+		type = "groupLockIdType",
+		name= "group",
+		description= "The id or name of the group to remove from the whitelist",
+		optional= false,
+	}
+	local command3 = {
+		name = "grouplock-remove",
+		aliases= { "gcremove","gc-" },
+		description= "Add a group to the group lock whitelist",
+		group= "moderation",   
+		noLog= false,
+		args= { arg3 },
+		permissions= { },
+		envClient=nil, 
+		env=nil,  
+		runClient=nil,
+		run=function(context, groupData)
+			for i,group in pairs(allowedGroups)do
+				if(group.id == groupData.id)then
+					table.remove(allowedGroups, i)
+				end
+			end
+			groupLockAllowed.Value = httpService:JSONEncode(allowedGroups)
+			context._K.Remote.Notify:FireClient(context.fromPlayer,{
+				From = "_K",
+				Text = `<b>Removed <font color="rgb(18,221,201)">{groupData.Name}</font> from the group lock whitelist</b>`,
+			})
+		end,
+	}
+	
+	
+	local groupLockGroupIdType = {
+		filterLog = true,
+		transform = nil,
+		validate = function(v)
+			local allowedGroups = game:GetService("HttpService"):JSONDecode(game.ReplicatedStorage.GroupLockAllowed.Value)
+			for _,group in pairs(allowedGroups)do
+				if(string.sub(tostring(group.id),1,#v) == tostring(v) or string.sub(string.lower(group.Name),1,#v) == string.lower(v))then
+					return true
+				end
+			end
+			return false, "Group not found"
+		end,
+		parse = function(v, self)
+			local allowedGroups = game:GetService("HttpService"):JSONDecode(game.ReplicatedStorage.GroupLockAllowed.Value)
+			for _,group in pairs(allowedGroups)do
+				if(string.sub(tostring(group.id),1,#v) == tostring(v) or string.sub(string.lower(group.Name),1,#v) == string.lower(v))then
+					return group
+				end
+			end
+			return nil, "Invalid group"
+		end,
+		suggestions = function(text)
+			local allowedGroups = game:GetService("HttpService"):JSONDecode(game.ReplicatedStorage.GroupLockAllowed.Value)
+			local suggestions = {}
+			text = tostring(text)
+			for _,group in pairs(allowedGroups)do
+				if(string.sub(tostring(group.id),1,#text) == tostring(text))then
+					table.insert(suggestions, tostring(group.id))
+				end
+				if(string.sub(string.lower(group.Name),1,#text) == string.lower(text))then
+					table.insert(suggestions, group.Name)
+				end
+			end
+			return suggestions
+		end,
+	}
+	
+	_K.Registry.registerType("groupLockIdType", groupLockGroupIdType)
+	_K.Registry.registerType("groupId", groupIdType)
+	_K.Registry.registerCommand(_K, command3)
+	_K.Registry.registerCommand(_K, command2)
 	_K.Registry.registerCommand(_K, command)
 end
 ```
