@@ -306,7 +306,7 @@ return function(_K)
 		name = "Teamchat",
 		aliases= { "tc" },               -- Table of aliases.
 		description= "Toggle team chat only mode",                -- Description of what the command does.
-		group= "administration",                      -- What group the command belongs to.
+		group= "moderation",                      -- What group the command belongs to.
 		noLog= false,                    -- If the command should be hidden from logs.
 		args= { arg },      -- A table of argument definitions.
 		permissions= { }, -- A table of role permissions required to run the command.
@@ -318,6 +318,80 @@ return function(_K)
 	
 	
 	
+	_K.Registry.registerCommand(_K, command)
+end
+```
+</details>
+<details>
+<summary>Group lock toggle command</summary>
+
+```lua
+local GROUP_ID = 10055198
+local MINIMUM_RANK = 110 -- Minimum rank in the group to join when the lock is active
+
+
+return function(_K)
+	local isGroupLockEnabled = false
+	
+	local groupInfo = game:GetService("GroupService"):GetGroupInfoAsync(GROUP_ID)
+	
+	local minRank
+	for i,rankData in pairs(groupInfo.Roles) do
+		if(rankData.Rank > MINIMUM_RANK)then
+			minRank = rankData
+			break
+		end
+	end
+	
+	local function setupServer()
+		game.Players.PlayerAdded:Connect(function(player:Player)
+			if(isGroupLockEnabled == true)then
+				local rankInGroup = player:GetRankInGroup(GROUP_ID)
+				if(rankInGroup < MINIMUM_RANK)then
+					player:Kick(`Grouplocked server ! You must be {minRank.Name}+ in {groupInfo.Name} to join !`)
+				end
+			end
+		end)
+	end
+
+	local function runServer(context, enable)
+		local addText = ""
+		if(enable ~= nil)then
+			isGroupLockEnabled = enable
+		else
+			isGroupLockEnabled = not isGroupLockEnabled
+		end
+		if(isGroupLockEnabled == true)then
+			addText = `<br />Only <font color="rgb(18,221,201)"><b>{minRank.Name}+</b></font> from <font color="rgb(18,221,201)"><b>{groupInfo.Name}</b></font> can join`
+		end
+		context._K.Remote.Notify:FireAllClients({
+			From = "_K",
+			Text = `<b>Group lock {isGroupLockEnabled and "enabled" or "disabled"} !</b>{addText}`,
+		})
+	end
+
+	local arg = {
+		type = "boolean",
+		name= "enable",
+		description= "Wether to enable or disable the group lock",
+		optional= true,
+	}
+	local command = {
+		name = "grouplock",
+		aliases= { "gc" },
+		description= "Toggle server group lock",
+		group= "moderation",   
+		noLog= false,
+		args= { arg },
+		permissions= { },
+		envClient=function() print("Grouplock command made by Omega77073") end, 
+		env=setupServer,  
+		runClient=nil,
+		run=runServer
+	}
+
+
+
 	_K.Registry.registerCommand(_K, command)
 end
 ```
